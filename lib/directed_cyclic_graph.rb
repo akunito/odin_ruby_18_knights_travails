@@ -29,15 +29,7 @@ class Board
 
     @vertices = Array.new(@x_max) { |_i| Array.new(@y_max) { |_i| 0 }}
 
-    puts "\n========== generating nodes ============="
     generate_nodes
-
-
-    # puts "\n========== testing ============="
-    # puts "[#{@vertices[0][0].x__},#{@vertices[0][0].y__}]"
-    # puts "[#{@vertices[1][0].x__},#{@vertices[1][0].y__}]"
-    #
-    # puts "[#{@vertices[1][1].x__},#{@vertices[1][1].y__}]"
   end
 
   def generate_nodes
@@ -67,7 +59,7 @@ class Board
   def print
     print_header
 
-    @vertices.each_with_index do |row, y|
+    @vertices.each_with_index.reverse_each do |row, y|
       concat = "#{y} |"
       puts "  |#{'-----|'*@x_max}"
       row.each do |cell|
