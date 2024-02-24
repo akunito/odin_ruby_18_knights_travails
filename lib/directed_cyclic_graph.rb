@@ -30,18 +30,17 @@ class Board
     @vertices = Array.new(@x_max) { |_i| Array.new(@y_max) { |_i| 0 }}
 
     generate_nodes
+
+    # puts "\n========== testing ============="
+    # puts "[#{@vertices[0][0].x__},#{@vertices[0][0].y__}]"
+    # puts "[#{@vertices[1][0].x__},#{@vertices[1][0].y__}]"
+    #
+    # puts "[#{@vertices[1][1].x__},#{@vertices[1][1].y__}]"
   end
 
   def generate_nodes
-    y = @y_max-1
-    @y_max.times do
-      x = 0
-      @x_max.times do
-        # puts "#{x}, #{y}"
-        @vertices[x][y] = Vertex.new(x, y)
-        x += 1
-      end
-      y -= 1
+    @y_max.times.reverse_each do |y|
+      @x_max.times { |x| @vertices[x][y] = Vertex.new(x, y) }
     end
   end
 
@@ -63,8 +62,8 @@ class Board
       concat = "#{y} |"
       puts "  |#{'-----|'*@x_max}"
       row.each do |cell|
-        concat << " #{cell.x__},#{cell.y__} |" # to test indexes
-        # concat << "  #{cell.status}  |"
+        # concat << " #{cell.x__},#{cell.y__} |" # to test indexes
+        concat << "  #{cell.status}  |"
       end
       puts concat
     end
@@ -81,4 +80,4 @@ chess_board = Board.new(8,8)
 
 chess_board.print
 
-chess_board.knight_moves()
+# chess_board.knight_moves()
