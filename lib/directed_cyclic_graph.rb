@@ -15,6 +15,46 @@ class Vertex
     @x__ = x__
     @y__ = y__
     @status = " "
+
+    @chips = Hash.new(32)
+
+    @chips = {
+      "W_T_0" => "♜",
+      "W_H_1" => "♞",
+      "W_B_2" => "♝",
+      "W_Q_3" => "♛",
+      "W_K_4" => "♚",
+      "W_B_5" => "♝",
+      "W_H_6" => "♞",
+      "W_T_7" => "♜",
+
+      "W_P_0" => "♟",
+      "W_P_1" => "♟",
+      "W_P_2" => "♟",
+      "W_P_3" => "♟",
+      "W_P_4" => "♟",
+      "W_P_5" => "♟",
+      "W_P_6" => "♟",
+      "W_P_7" => "♟",
+
+      "B_T_0" => "♖",
+      "B_H_1" => "♘",
+      "B_B_2" => "♗",
+      "B_Q_3" => "♕",
+      "B_K_4" => "♔",
+      "B_B_5" => "♗",
+      "B_H_6" => "♘",
+      "B_T_7" => "♖",
+
+      "B_P_0" => "♙",
+      "B_P_1" => "♙",
+      "B_P_2" => "♙",
+      "B_P_3" => "♙",
+      "B_P_4" => "♙",
+      "B_P_5" => "♙",
+      "B_P_6" => "♙",
+      "B_P_7" => "♙",
+    }
   end
 end
 
@@ -61,14 +101,22 @@ class Board
     @vertices.each_with_index.reverse_each do |row, y|
       concat = "#{y} |"
       puts "  |#{'-----|'*@x_max}"
-      row.each do |cell|
-        # concat << " #{cell.x__},#{cell.y__} |" # to test indexes
-        concat << "  #{cell.status}  |"
-      end
+      row.each { |cell| concat << "  #{cell.status}  |" }
+      # row.each { |cell| concat << " #{cell.x__},#{cell.y__} |" } # to test indexes
       puts concat
     end
 
     print_footer
+  end
+
+  def search_horse(chip)
+
+  end
+
+  def set_position(x_pos, y_pos, chip)
+    if chip == "horse"
+      search_horse(chip)
+    end
   end
 
   def knight_moves(to_x, to_y)
@@ -79,5 +127,7 @@ end
 chess_board = Board.new(8,8)
 
 chess_board.print
+
+chess_board.set_position(3,4, "horse")
 
 # chess_board.knight_moves()
