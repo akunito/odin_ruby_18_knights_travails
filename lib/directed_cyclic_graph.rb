@@ -7,7 +7,8 @@ def log(string)
 end
 
 class Vertex
-  attr_reader :x__, :y__, :status
+  attr_reader :x__, :y__
+  attr_accessor :status
 
   def initialize(x__, y__)
     return unless x__ >= 0 && y__ >= 0
@@ -47,42 +48,50 @@ class Board
 
     generate_nodes
 
-    # puts "\n========== testing ============="
-    # puts "[#{@vertices[0][0].x__},#{@vertices[0][0].y__}]"
-    # puts "[#{@vertices[1][0].x__},#{@vertices[1][0].y__}]"
-    #
-    # puts "[#{@vertices[1][1].x__},#{@vertices[1][1].y__}]"
+    paint_chess
+
+    puts "\n========== testing ============="
+    puts "[#{@vertices[0][0].x__},#{@vertices[0][0].y__}]"
+    puts "[#{@vertices[1][0].x__},#{@vertices[1][0].y__}]"
+
+    puts "[#{@vertices[1][1].x__},#{@vertices[1][1].y__}]"
   end
 
   def generate_nodes
-    @y_max.times.reverse_each do |y|
+    (@y_max-1).downto(0).each do |y|
       @x_max.times {|x| @vertices[x][y] = Vertex.new(x, y) }
     end
   end
 
-  def print_header
-    puts "\n"
-    header = "  |"
-    @x_max.times {|x| header << "  #{x}  |" }
-    puts header
+  def paint_chess
+    (@y_max-1).downto(0).each do |y|
+      @vertices[y].each_with_index do |cell, x|
+        cell.status = if y.even?
+                        (x.even? ? "⬜" : "⬛")
+                      else
+                        (x.even? ? "⬛" : "⬜")
+                      end
+      end
+    end
   end
 
-  def print_footer
-    puts "  |#{'-----|'*@x_max}\n"
+  def print_header
+    header = "\n  |"
+    # @x_max.times {|x| header << "#{x}|" }
+    header << "0️|1️2️3️|4️|5️6️|7️"
+    puts header
   end
 
   def print
     print_header
 
-    @vertices.each_with_index.reverse_each do |row, y|
+    (@y_max-1).downto(0).each do |y|
       concat = "#{y} |"
-      puts "  |#{'-----|'*@x_max}"
-      row.each {|cell| concat << "  #{cell.status}  |" }
-      # row.each { |cell| concat << " #{cell.x__},#{cell.y__} |" } # to test indexes
+      @vertices[y].each {|cell| concat << "#{cell.status}|" }
       puts concat
     end
 
-    print_footer
+    puts "\n"
   end
 
   def search_horse(chip)
