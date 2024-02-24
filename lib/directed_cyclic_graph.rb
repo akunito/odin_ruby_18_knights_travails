@@ -15,46 +15,6 @@ class Vertex
     @x__ = x__
     @y__ = y__
     @status = " "
-
-    @chips = Hash.new(32)
-
-    @chips = {
-      "W_T_0" => "♜",
-      "W_H_1" => "♞",
-      "W_B_2" => "♝",
-      "W_Q_3" => "♛",
-      "W_K_4" => "♚",
-      "W_B_5" => "♝",
-      "W_H_6" => "♞",
-      "W_T_7" => "♜",
-
-      "W_P_0" => "♟",
-      "W_P_1" => "♟",
-      "W_P_2" => "♟",
-      "W_P_3" => "♟",
-      "W_P_4" => "♟",
-      "W_P_5" => "♟",
-      "W_P_6" => "♟",
-      "W_P_7" => "♟",
-
-      "B_T_0" => "♖",
-      "B_H_1" => "♘",
-      "B_B_2" => "♗",
-      "B_Q_3" => "♕",
-      "B_K_4" => "♔",
-      "B_B_5" => "♗",
-      "B_H_6" => "♘",
-      "B_T_7" => "♖",
-
-      "B_P_0" => "♙",
-      "B_P_1" => "♙",
-      "B_P_2" => "♙",
-      "B_P_3" => "♙",
-      "B_P_4" => "♙",
-      "B_P_5" => "♙",
-      "B_P_6" => "♙",
-      "B_P_7" => "♙",
-    }
   end
 end
 
@@ -67,7 +27,23 @@ class Board
     @x_max = x_max
     @y_max = y_max
 
-    @vertices = Array.new(@x_max) { |_i| Array.new(@y_max) { |_i| 0 }}
+    @chips = {
+      # White back
+      "WT0" => "♜", "WH1" => "♞", "WB2" => "♝", "WQ3" => "♛", "WK4" => "♚", "WB5" => "♝", "WH6" => "♞", "WT7" => "♜",
+
+      # White pawns
+      "WP0" => "♟", "WP1" => "♟", "WP2" => "♟", "WP3" => "♟", "WP4" => "♟", "WP5" => "♟", "WP6" => "♟", "WP7" => "♟",
+
+      # Black back
+      "BT0" => "♖", "BH1" => "♘", "BB2" => "♗", "BQ3" => "♕", "BK4" => "♔", "BB5" => "♗", "BH6" => "♘", "BT7" => "♖",
+
+      # Black pawns
+      "BP0" => "♙", "BP1" => "♙", "BP2" => "♙", "BP3" => "♙", "BP4" => "♙", "BP5" => "♙", "BP6" => "♙", "BP7" => "♙",
+    }
+
+    @chips.each {|c| p c }
+
+    @vertices = Array.new(@x_max) {|_i| Array.new(@y_max) {|_i| 0 } }
 
     generate_nodes
 
@@ -80,14 +56,14 @@ class Board
 
   def generate_nodes
     @y_max.times.reverse_each do |y|
-      @x_max.times { |x| @vertices[x][y] = Vertex.new(x, y) }
+      @x_max.times {|x| @vertices[x][y] = Vertex.new(x, y) }
     end
   end
 
   def print_header
     puts "\n"
     header = "  |"
-    @x_max.times { |x| header << "  #{x}  |" }
+    @x_max.times {|x| header << "  #{x}  |" }
     puts header
   end
 
@@ -101,7 +77,7 @@ class Board
     @vertices.each_with_index.reverse_each do |row, y|
       concat = "#{y} |"
       puts "  |#{'-----|'*@x_max}"
-      row.each { |cell| concat << "  #{cell.status}  |" }
+      row.each {|cell| concat << "  #{cell.status}  |" }
       # row.each { |cell| concat << " #{cell.x__},#{cell.y__} |" } # to test indexes
       puts concat
     end
