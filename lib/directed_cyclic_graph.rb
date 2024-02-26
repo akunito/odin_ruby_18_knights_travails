@@ -44,6 +44,16 @@ class Board
       BP0: "♙", BP1: "♙", BP2: "♙", BP3: "♙", BP4: "♙", BP5: "♙", BP6: "♙", BP7: "♙",
     }
 
+    @horse_movements =
+      [+2, +1],
+      [+2, -1],
+      [+1, -2],
+      [-1, -2],
+      [-2, -1],
+      [-2, +1],
+      [-1, +2],
+      [+1, +2]
+
     @chips.each {|c| p c }
 
     @vertices = Array.new(@x_max) {|_i| Array.new(@y_max) {|_i| 0 } }
@@ -203,17 +213,17 @@ class Board
   def check_moves_knight(chip)
     puts "check moves knight test ========"
 
-    horse_movements =
-      [+2, +1],
-      [+2, -1],
-      [+1, -2],
-      [-1, -2],
-      [-2, -1],
-      [-2, +1],
-      [-1, +2],
-      [+1, +2]
+    get_possible_movements(chip, @horse_movements)
+  end
 
-    get_possible_movements(chip, horse_movements)
+  def get_possible_path(current_x, current_y, x_to, y_to, type_of_movements)
+    # set type_of_movements with for example: @horse_movements
+
+  end
+
+  def get_horse_paths(x_from, y_from, x_to, y_to)
+    puts "============================================ get horse paths test"
+    p get_possible_path(x_from, y_from, x_to, y_to, @horse_movements)
   end
 
   def check_moves(chip)
@@ -250,8 +260,7 @@ chess_board.print
 # chess_board.check_moves(:WHL)
 chess_board.check_moves(:WHL)
 
-
-
+chess_board.get_horse_paths(0, 4, 7, 7)
 
 # chess_board.set_chess_new_match_positions
 
