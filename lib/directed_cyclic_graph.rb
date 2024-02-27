@@ -1,5 +1,7 @@
 # https://www.theodinproject.com/lessons/ruby-knights-travails
 
+require_relative "./tree"
+
 @debug = true
 
 def log(string)
@@ -116,6 +118,20 @@ class Board
     puts "\n"
   end
 
+  def print_only_temps
+    print_header
+
+    (@y_max-1).downto(0).each do |y|
+      concat = "#{y} |"
+      @vertices[y].each do |cell|
+        concat << (cell.temp_status == " " ? "#{cell.background}|" : "#{cell.temp_status}|")
+      end
+      puts concat
+    end
+
+    puts "\n"
+  end
+
   def search_chip(chip)
     @vertices.each { |row| row.each { |cell| return cell if cell.status == chip } }
     nil
@@ -137,6 +153,23 @@ class Board
 
     # printing temp positions
     print
+
+    # removing temp positions
+    possible_movements.each do |movement|
+      @vertices[movement[0]][movement[1]].temp_status = " "
+      # puts "Temp position #{movement} -> #{@vertices[movement[0]][movement[1]].temp_status} have been removed"
+    end
+  end
+
+  def print_only_temp_positions(possible_movements)
+    # setting temp positions
+    possible_movements.each do |movement|
+      @vertices[movement[0]][movement[1]].temp_status = "O"
+      # puts "Temp position #{movement} -> #{@vertices[movement[0]][movement[1]].temp_status} have been set"
+    end
+
+    # printing temp positions
+    print_only_temps
 
     # removing temp positions
     possible_movements.each do |movement|
@@ -190,6 +223,7 @@ class Board
   end
 
   def get_possible_movements(chip, chip_movements)
+    # Use this one for chess game
     return puts "\nthat chip is out of the board" unless search_chip(chip)
 
     current_pos = search_chip(chip)
@@ -210,20 +244,55 @@ class Board
     possible_movements
   end
 
-  def check_moves_knight(chip)
-    puts "check moves knight test ========"
+  def get_closer_possible_movements(current_x, current_y, x_to, y_to, chip_movements)
+    # Use this one for calculate paths closer to given destiny for Knights Travails project
+    return unless current_x.between?(0,7) && current_y.between?(0,7)
 
+    possible_movements = []
+    chip_movements.each do |movement|
+      next unless (current_x + movement[0]).between?(0,7) && (current_y + movement[1]).between?(0,7)
+
+      temp_array = [],[]
+      temp_array[0] = (current_x + movement[0])
+      temp_array[1] = (current_y + movement[1])
+      possible_movements << temp_array
+    end
+    # possible_movements.each { |movement| p movement }
+
+    # print_only_temp_positions(possible_movements)
+
+    possible_movements
+  end
+
+  def return_all_nodes
+    cells = []
+    (@y_max-1).downto(0).each do |y|
+      @x_max.times {|x| cells << @vertices[x][y] }
+    end
+    cells
+  end
+
+  def check_moves_knight(chip)
     get_possible_movements(chip, @horse_movements)
   end
 
-  def get_possible_path(current_x, current_y, x_to, y_to, type_of_movements)
+  def get_possible_path(current_x, current_y, x_to, y_to, type_of_movements, path=[])
     # set type_of_movements with for example: @horse_movements
+    puts "============================ GET POSSIBLE PATH ================================="
+    nil unless path.length < 7
 
+    # get array with all vertices
+    cells = return_all_nodes
+    # cells.each { |cell| p cell }
+
+
+
+    p path
   end
 
   def get_horse_paths(x_from, y_from, x_to, y_to)
-    puts "============================================ get horse paths test"
-    p get_possible_path(x_from, y_from, x_to, y_to, @horse_movements)
+    puts "============================================ get horse paths test ===================================="
+    get_possible_path(x_from, y_from, x_to, y_to, @horse_movements)
   end
 
   def check_moves(chip)
