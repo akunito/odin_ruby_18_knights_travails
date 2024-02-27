@@ -1,6 +1,6 @@
 # https://www.theodinproject.com/lessons/ruby-knights-travails
 
-require_relative "./tree"
+# require_relative "./tree"
 
 @debug = true
 
@@ -10,7 +10,7 @@ end
 
 class Vertex
   attr_reader :x__, :y__
-  attr_accessor :status, :background, :temp_status
+  attr_accessor :status, :background, :temp_status, :links
 
   def initialize(x__, y__)
     return unless x__ >= 0 && y__ >= 0
@@ -20,8 +20,115 @@ class Vertex
     @status = " "
     @background = " "
     @temp_status = " "
+
+    @links = []
   end
 end
+
+class Tree
+  attr_accessor :root
+
+  def initialize(vertices, current_x, current_y, x_to, y_to, type_of_movements)
+    puts "====================== initialize tree ================================"
+    @vertices_queue = vertices
+
+    # print all vertices x y
+    # @vertices_queue.each do |vertex|
+    #   puts "#{vertex.x__}, #{vertex.y__}"
+    # end
+
+    @root = build_tree(current_x, current_y, x_to, y_to, type_of_movements)
+  end
+
+  def next_positions(current_x, current_y, chip_movements)
+    # Use this one for calculate paths closer to given destiny for Knights Travails project
+    return unless current_x.between?(0,7) && current_y.between?(0,7)
+
+    possible_movements = []
+    chip_movements.each do |movement|
+      next unless (current_x + movement[0]).between?(0,7) && (current_y + movement[1]).between?(0,7)
+
+      temp_array = [],[]
+      temp_array[0] = (current_x + movement[0])
+      temp_array[1] = (current_y + movement[1])
+      possible_movements << temp_array
+    end
+    # possible_movements.each { |movement| p movement }
+
+    # print_only_temp_positions(possible_movements)
+
+    possible_movements
+  end
+
+  def link_next_positions(current_positions, current_root)
+    # get the new positions (current_positions in this scope) and link them to current_root
+    next_positions = []
+
+    current_positions.each do |position|
+      next_positions << find_vertex(position[0], position[1])  # HERE SOMETHING IS LINKING MORE THAN IT SHOULD
+    end
+
+    # link the next positions found to current root
+    current_root.links = next_positions
+
+    next_positions
+  end
+
+  def find_vertex(current_x, current_y)
+    @vertices_queue.each do |vertex|
+      next unless (vertex.x__ == current_x) && (vertex.y__ == current_y)
+
+      return vertex
+    end
+  end
+
+  def delete_vertex(current_x, current_y)
+    @vertices_queue.each_with_index do |vertex, i|
+      next unless (vertex.x__ == current_x) && (vertex.y__ == current_y)
+
+      puts "deleting next"
+      p @vertices_queue.delete_at(i)
+    end
+  end
+
+  def build_tree(current_x, current_y, x_to, y_to, type_of_movements)
+    return unless @vertices_queue.length.positive?
+
+    # get root and delete it from @vertices_queue
+    root = find_vertex(current_x, current_y)
+    delete_vertex(root.x__, root.y__)
+
+    # get next positions
+    next_positions = next_positions(root.x__, root.y__, type_of_movements)
+    # link positions to root
+    next_positions = link_next_positions(next_positions, root)
+    # delete linked positions from @vertices_queue
+    next_positions.each { |vertex| delete_vertex(vertex.x__, vertex.y__) }
+    # iterate next_positions
+    next_root = next_positions
+
+    trash_bin = []
+    next_root.each do |next_root_|
+      # get next positions
+      next_positions = next_positions(next_root_.x__, next_root_.y__, type_of_movements)
+      # link positions to root
+      next_positions = link_next_positions(next_positions, next_root_)
+      # gather all the used positions to remove later
+      puts "\n"
+      next_positions.each { |position| p position }
+      # next_positions.each { |position| trash_bin << position }
+    end
+
+    puts "\ntrash bin ======="
+    trash_bin.each do |vertex|
+      p vertex
+      # delete_vertex(vertex.x__, vertex.y__)
+    end
+
+    root
+  end
+end
+
 
 class Board
   attr_reader :x_max, :y_max
@@ -244,27 +351,7 @@ class Board
     possible_movements
   end
 
-  def get_closer_possible_movements(current_x, current_y, x_to, y_to, chip_movements)
-    # Use this one for calculate paths closer to given destiny for Knights Travails project
-    return unless current_x.between?(0,7) && current_y.between?(0,7)
-
-    possible_movements = []
-    chip_movements.each do |movement|
-      next unless (current_x + movement[0]).between?(0,7) && (current_y + movement[1]).between?(0,7)
-
-      temp_array = [],[]
-      temp_array[0] = (current_x + movement[0])
-      temp_array[1] = (current_y + movement[1])
-      possible_movements << temp_array
-    end
-    # possible_movements.each { |movement| p movement }
-
-    # print_only_temp_positions(possible_movements)
-
-    possible_movements
-  end
-
-  def return_all_nodes
+  def return_all_vertices
     cells = []
     (@y_max-1).downto(0).each do |y|
       @x_max.times {|x| cells << @vertices[x][y] }
@@ -276,18 +363,15 @@ class Board
     get_possible_movements(chip, @horse_movements)
   end
 
-  def get_possible_path(current_x, current_y, x_to, y_to, type_of_movements, path=[])
+  def get_possible_path(current_x, current_y, x_to, y_to, type_of_movements)
     # set type_of_movements with for example: @horse_movements
     puts "============================ GET POSSIBLE PATH ================================="
-    nil unless path.length < 7
 
-    # get array with all vertices
-    cells = return_all_nodes
-    # cells.each { |cell| p cell }
+    # create Tree and build it up
+    tree = Tree.new(return_all_vertices, current_x, current_y, x_to, y_to, type_of_movements)
 
-
-
-    p path
+    puts "\n\nreturning result >>>"
+    p tree
   end
 
   def get_horse_paths(x_from, y_from, x_to, y_to)
