@@ -48,9 +48,6 @@ class Tree
     chip_movements.each do |movement|
       next unless (current_x + movement[0]).between?(0,7) && (current_y + movement[1]).between?(0,7)
 
-      puts "\nNEXT POSITIONS ================================"
-      puts "#{current_x}, #{current_y} + #{movement[0]}, #{movement[1]} = #{current_x + movement[0]}, #{current_y + movement[1]}"
-
       temp_array = [],[]
       temp_array[0] = (current_x + movement[0])
       temp_array[1] = (current_y + movement[1])
@@ -65,32 +62,36 @@ class Tree
 
   def link_next_positions(current_positions, current_root)
     # get the new positions (current_positions in this scope) and link them to current_root
-    next_positions = []
+    linked_positions = []
 
     current_positions.each do |position|
-      puts "test >> current_position #{position[0]}, #{position[1]}"
-      next_positions << find_vertex(position[0], position[1])  # HERE SOMETHING IS LINKING MORE THAN IT SHOULD
+      unless position.nil?
+        puts "test >> current_position #{position[0]}, #{position[1]}"
+        linked_positions << find_vertex(position[0], position[1])
+      end
     end
-    # puts "\nDEBUG INSIDE ==========="
-    # next_positions.each { |e| p e }
-    # puts "\n================="
 
     # link the next positions found to current root
-    current_root.links << next_positions
+    puts "\nadding links to root >> #{current_root.x__}, #{current_root.y__}"
+    linked_positions.each do |pos|
+      current_root.links << pos
+    end
+    current_root.links.each { |link| puts "\t\t<< linked: #{link.x__}, #{link.y__}" }
+    puts "\n"
 
-    next_positions
+    puts "read linked_positions before returning them"
+    linked_positions.each { |pos| p pos }
+    puts ""
+
+    linked_positions
   end
 
   def find_vertex(current_x, current_y)
     @vertices_queue.each do |vertex|
       if (vertex.x__ == current_x) && (vertex.y__ == current_y)
-        puts "\nVERTEX DEBUG YES"
-        p vertex
-        return vertex
-      else
-        # puts "\nVERTEX DEBUG NOT"
+        # puts "\nVERTEX DEBUG YES"
         # p vertex
-        nil
+        return vertex
       end
     end
   end
@@ -99,8 +100,7 @@ class Tree
     @vertices_queue.each_with_index do |vertex, i|
       next unless (vertex.x__ == current_x) && (vertex.y__ == current_y)
 
-      puts "deleting next"
-      p @vertices_queue.delete_at(i)
+      @vertices_queue.delete_at(i)
     end
   end
 
@@ -114,29 +114,34 @@ class Tree
     # get next positions
     next_positions = next_positions(root.x__, root.y__, type_of_movements)
     # link positions to root
-    next_positions = link_next_positions(next_positions, root)
+    linked_positions = link_next_positions(next_positions, root)
     # delete linked positions from @vertices_queue
-    next_positions.each { |vertex| delete_vertex(vertex.x__, vertex.y__) }
+    linked_positions.each do |pos|
+      puts "removing >> [#{pos.x__}, #{pos.y__}] vertex from queue"
+      delete_vertex(pos.x__, pos.y__)
+    end
     # iterate next_positions
     next_root = next_positions
 
     trash_bin = []
+    linked_positions = []
+
     next_root.each do |next_root_|
       # get next positions
-      next_positions = next_positions(next_root_.x__, next_root_.y__, type_of_movements)
+      next_positions = next_positions(next_root_[0], next_root_[1], type_of_movements)
       # link positions to root
-      next_positions = link_next_positions(next_positions, next_root_)
+      link_next_positions(next_positions, next_root_).each { |pos| linked_positions << pos }
       puts "\nDEBUG OUTSIDE ==========="
       next_positions.each { |e| p e }
       puts "\n================="
       # gather all the used positions to remove later
-      # next_positions.each { |position| trash_bin << position }
+      next_positions.each { |position| trash_bin << position }
     end
 
     puts "\ntrash bin ======="
     trash_bin.each do |vertex|
       p vertex
-      # delete_vertex(vertex.x__, vertex.y__)
+      delete_vertex(vertex.x__, vertex.y__)
     end
 
     root
@@ -219,7 +224,7 @@ class Board
     footer = "  |"
     # @x_max.times {|x| header << "#{x}|" }
     # header << "0️|1️2️3️|4️|5️6️|7️" # testing different chars
-    footer << "0|1|2|3|4|5|6|7|\n"
+    footer << "0|1|2|3|4|5|6|7|\n\n"
     puts footer
   end
 
@@ -429,7 +434,7 @@ chess_board.print
 # chess_board.check_moves(:WHL)
 chess_board.check_moves(:WHL)
 
-chess_board.get_horse_paths(0, 4, 7, 7)
+chess_board.get_horse_paths(4, 0, 7, 7)
 
 # chess_board.set_chess_new_match_positions
 
