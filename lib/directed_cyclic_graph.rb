@@ -41,12 +41,15 @@ class Tree
   end
 
   def next_positions(current_x, current_y, chip_movements)
-    # Use this one for calculate paths closer to given destiny for Knights Travails project
+    # Use this one for calculate paths to given destiny for Knights Travails project
     return unless current_x.between?(0,7) && current_y.between?(0,7)
 
     possible_movements = []
     chip_movements.each do |movement|
       next unless (current_x + movement[0]).between?(0,7) && (current_y + movement[1]).between?(0,7)
+
+      puts "\nNEXT POSITIONS ================================"
+      puts "#{current_x}, #{current_y} + #{movement[0]}, #{movement[1]} = #{current_x + movement[0]}, #{current_y + movement[1]}"
 
       temp_array = [],[]
       temp_array[0] = (current_x + movement[0])
@@ -65,20 +68,30 @@ class Tree
     next_positions = []
 
     current_positions.each do |position|
+      puts "test >> current_position #{position[0]}, #{position[1]}"
       next_positions << find_vertex(position[0], position[1])  # HERE SOMETHING IS LINKING MORE THAN IT SHOULD
     end
+    # puts "\nDEBUG INSIDE ==========="
+    # next_positions.each { |e| p e }
+    # puts "\n================="
 
     # link the next positions found to current root
-    current_root.links = next_positions
+    current_root.links << next_positions
 
     next_positions
   end
 
   def find_vertex(current_x, current_y)
     @vertices_queue.each do |vertex|
-      next unless (vertex.x__ == current_x) && (vertex.y__ == current_y)
-
-      return vertex
+      if (vertex.x__ == current_x) && (vertex.y__ == current_y)
+        puts "\nVERTEX DEBUG YES"
+        p vertex
+        return vertex
+      else
+        # puts "\nVERTEX DEBUG NOT"
+        # p vertex
+        nil
+      end
     end
   end
 
@@ -113,9 +126,10 @@ class Tree
       next_positions = next_positions(next_root_.x__, next_root_.y__, type_of_movements)
       # link positions to root
       next_positions = link_next_positions(next_positions, next_root_)
+      puts "\nDEBUG OUTSIDE ==========="
+      next_positions.each { |e| p e }
+      puts "\n================="
       # gather all the used positions to remove later
-      puts "\n"
-      next_positions.each { |position| p position }
       # next_positions.each { |position| trash_bin << position }
     end
 
@@ -165,29 +179,31 @@ class Board
 
     @chips.each {|c| p c }
 
-    @vertices = Array.new(@x_max) {|_i| Array.new(@y_max) {|_i| 0 } }
+    @vertices = Array.new(@y_max) {|_i| Array.new(@x_max) {|_i| 0 } }
 
     generate_nodes
 
     paint_chess
 
-    # puts "\n========== testing ============="
-    # puts "[#{@vertices[0][0].x__},#{@vertices[0][0].y__}]"
-    # puts "[#{@vertices[1][0].x__},#{@vertices[1][0].y__}]"
-    #
-    # puts "[#{@vertices[1][1].x__},#{@vertices[1][1].y__}]"
+    puts "\n========== testing ============="
+    puts "[#{@vertices[0][0].x__},#{@vertices[0][0].y__}]"
+    puts "[#{@vertices[1][0].x__},#{@vertices[1][0].y__}]"
+
+    puts "[#{@vertices[1][1].x__},#{@vertices[1][1].y__}]"
   end
 
   def generate_nodes
-    (@y_max-1).downto(0).each do |y|
-      @x_max.times {|x| @vertices[x][y] = Vertex.new(x, y) }
+    (@x_max-1).downto(0).each do |x|
+      @y_max.times {|y| @vertices[x][y] = Vertex.new(x, y) }
     end
   end
 
   def paint_chess
+    puts "\n"
     (@y_max-1).downto(0).each do |y|
-      @vertices[y].each_with_index do |cell, x|
-        cell.background = if y.even?
+      concat = "#{y} |"
+      (0).upto(@x_max-1).each do |x|
+        @vertices[x][y].background = if y.even?
                             # (x.even? ? "⬜" : "⬛") # testing different chars
                             (x.even? ? " " : " ")
                           else
@@ -199,34 +215,34 @@ class Board
     # @vertices.each { |row| row.each { |cell| cell.status = cell.background } }
   end
 
-  def print_header
-    header = "\n  |"
+  def print_footer
+    footer = "  |"
     # @x_max.times {|x| header << "#{x}|" }
     # header << "0️|1️2️3️|4️|5️6️|7️" # testing different chars
-    header << "0|1|2|3|4|5|6|7|"
-    puts header
+    footer << "0|1|2|3|4|5|6|7|\n"
+    puts footer
   end
 
   def print
-    print_header
-
+    puts "\n"
     (@y_max-1).downto(0).each do |y|
       concat = "#{y} |"
-      @vertices[y].each do |cell|
-        concat << if cell.status == " " # if cell is empty -> show background or temp position O
-                    cell.temp_status == " " ? "#{cell.background}|" : "#{cell.temp_status}|"
+      (0).upto(@x_max-1).each do |x|
+        # p @vertices[x][y]
+        concat << if @vertices[x][y].status == " " # if cell is empty -> show background or temp position O
+                    @vertices[x][y].temp_status == " " ? "#{@vertices[x][y].background}|" : "#{@vertices[x][y].temp_status}|"
                   else                  # if cell is busy ->  show status or temp position X
-                    cell.temp_status == " " ? "#{@chips[cell.status]}|" : "X|"
+                    @vertices[x][y].temp_status == " " ? "#{@chips[@vertices[x][y].status]}|" : "X|"
                   end
       end
       puts concat
     end
 
-    puts "\n"
+    print_footer
   end
 
   def print_only_temps
-    print_header
+    print_footer
 
     (@y_max-1).downto(0).each do |y|
       concat = "#{y} |"
@@ -247,8 +263,8 @@ class Board
   def set_first_position(x_pos, y_pos, chip)
     return unless @chips[chip] && x_pos.between?(0,7) && y_pos.between?(0,7)
 
-    @vertices[y_pos][x_pos].status = chip # @chips[chip]
-    "#{chip} #{@vertices[y_pos][x_pos].status} have been set"
+    @vertices[x_pos][y_pos].status = chip # @chips[chip]
+    "#{chip} #{@vertices[x_pos][y_pos].status} have been set"
   end
 
   def print_temp_positions(possible_movements)
@@ -353,8 +369,8 @@ class Board
 
   def return_all_vertices
     cells = []
-    (@y_max-1).downto(0).each do |y|
-      @x_max.times {|x| cells << @vertices[x][y] }
+    (@x_max-1).downto(0).each do |x|
+      @y_max.times {|y| cells << @vertices[x][y] }
     end
     cells
   end
