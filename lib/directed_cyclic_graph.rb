@@ -87,13 +87,15 @@ class Tree
   end
 
   def find_vertex(current_x, current_y)
+    # try the other way around to check
+
     @vertices_queue.each do |vertex|
       if (vertex.x__ == current_x) && (vertex.y__ == current_y)
-        # puts "\nVERTEX DEBUG YES"
-        # p vertex
+        puts "\nVERTEX DEBUG YES"
         return vertex
       end
     end
+    puts "NO VERTEX"
   end
 
   def delete_vertex(current_x, current_y)
@@ -130,7 +132,14 @@ class Tree
       # get next positions
       next_positions = next_positions(next_root_[0], next_root_[1], type_of_movements)
       # link positions to root
-      link_next_positions(next_positions, next_root_).each { |pos| linked_positions << pos }
+      puts "\nread next_positions before sending to link_next_positions"
+      next_positions.each { |pos| p pos }
+      puts "\nprinting them as vertices"
+      next_positions.each { |pos| p find_vertex(pos[0], pos[1]) }
+      puts ""
+      linked_positions_temp = link_next_positions(next_positions, next_root_)
+      linked_positions_temp.each { |pos| linked_positions << pos }
+
       puts "\nDEBUG OUTSIDE ==========="
       next_positions.each { |e| p e }
       puts "\n================="
