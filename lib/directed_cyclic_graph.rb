@@ -67,9 +67,15 @@ class Tree
     current_positions.each do |position|
       unless position.nil?
         puts "test >> current_position #{position[0]}, #{position[1]}"
-        linked_positions << find_vertex(position[0], position[1])
+        temp_array = [],[]
+        temp_array[0] = position[0]
+        temp_array[1] = position[1]
+        linked_positions << temp_array
       end
     end
+
+    # clean positions that are not in queue
+    linked_positions = cross_next_pos_with_queue(linked_positions)
 
     # link the next positions found to current root
     puts "\nadding links to root >> #{current_root.x__}, #{current_root.y__}"
@@ -87,15 +93,18 @@ class Tree
   end
 
   def find_vertex(current_x, current_y)
-    # try the other way around to check
-
     @vertices_queue.each do |vertex|
       if (vertex.x__ == current_x) && (vertex.y__ == current_y)
         puts "\nVERTEX DEBUG YES"
         return vertex
       end
     end
-    puts "NO VERTEX"
+  end
+
+  def cross_next_pos_with_queue(next_positions)
+    next_positions.each do |position|
+      puts "#{position[0]} #{position[1]}"
+    end
   end
 
   def delete_vertex(current_x, current_y)
@@ -131,12 +140,13 @@ class Tree
     next_root.each do |next_root_|
       # get next positions
       next_positions = next_positions(next_root_[0], next_root_[1], type_of_movements)
-      # link positions to root
       puts "\nread next_positions before sending to link_next_positions"
       next_positions.each { |pos| p pos }
       puts "\nprinting them as vertices"
-      next_positions.each { |pos| p find_vertex(pos[0], pos[1]) }
+      # clean positions not found in the queue
+      next_positions = cross_next_pos_with_queue(next_positions)
       puts ""
+      # link positions to root
       linked_positions_temp = link_next_positions(next_positions, next_root_)
       linked_positions_temp.each { |pos| linked_positions << pos }
 
