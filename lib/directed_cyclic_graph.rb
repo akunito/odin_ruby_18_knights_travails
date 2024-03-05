@@ -103,7 +103,51 @@ class Tree
     end
   end
 
+  def build_tree_loop(next_positions, x_to, y_to, type_of_movements)
+    round = 1
+    found = false
+
+    until found
+      puts "\n\n\t ================================================================ round #{round}"
+      round += 1
+
+      # iterate next_positions
+      next_roots = next_positions
+
+      trash_bin = []
+      linked_positions = []
+
+      next_roots.each do |next_root|
+        # print current root to be iterated
+        puts "\n\n\t >>>>>>>>>>>>> next root is >> [#{next_root.x__}, #{next_root.y__}] <<<<<<<<<<<<<<<<<<<"
+
+        # get next positions
+        next_positions = next_positions(next_root.x__, next_root.y__, type_of_movements)
+
+        linked_positions_temp = link_next_positions(next_positions, next_root)
+        linked_positions_temp.each { |pos| linked_positions << pos }
+
+        # gather all the used positions to remove later
+        next_positions.each { |position| trash_bin << position }
+      end
+
+      puts "\nemptying trash bin and check if destiny was found >>>> destiny is [#{x_to}, #{y_to}] ======="
+      trash_bin.uniq!
+      trash_bin.each do |vertex|
+        p vertex
+        delete_vertex(vertex.x__, vertex.y__)
+        if (vertex.x__ == x_to) && (vertex.y__ == y_to)
+          puts "\t\t\t\t\t\t >>>>>>>>>>> destiny was found at [#{vertex.x__}, #{vertex.y__}] <<<<<<<<<<<<<"
+          found = true
+        end
+      end
+    end
+
+  end
+
   def build_tree(current_x, current_y, x_to, y_to, type_of_movements)
+    # TODO: Return possible paths
+
     return unless @vertices_queue.length.positive?
 
     # round 0
@@ -122,37 +166,7 @@ class Tree
       delete_vertex(pos.x__, pos.y__)
     end
 
-    # round 1 <<< switch to loop until root == destiny or !root
-    puts "\n\n\t ================================================================ round 1"
-    # iterate next_positions
-    next_roots = next_positions
-
-    trash_bin = []
-    linked_positions = []
-
-    next_roots.each do |next_root|
-      # print current root to be iterated
-      puts "\n\n\t >>>>>>>>>>>>> next root is >> [#{next_root.x__}, #{next_root.y__}] <<<<<<<<<<<<<<<<<<<"
-
-      # get next positions
-      next_positions = next_positions(next_root.x__, next_root.y__, type_of_movements)
-      # link positions to root
-      # puts "\nread next_positions before sending to link_next_positions"
-      # next_positions.each {|pos| p pos }
-
-      linked_positions_temp = link_next_positions(next_positions, next_root)
-      linked_positions_temp.each {|pos| linked_positions << pos }
-
-      # gather all the used positions to remove later
-      next_positions.each {|position| trash_bin << position }
-    end
-
-    puts "\nemptying trash bin ======="
-    trash_bin.uniq!
-    trash_bin.each do |vertex|
-      p vertex
-      delete_vertex(vertex.x__, vertex.y__)
-    end
+    build_tree_loop(next_positions, x_to, y_to, type_of_movements)
 
     root
   end
