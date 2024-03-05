@@ -179,8 +179,6 @@ class Tree
   end
 
   def build_tree(current_x, current_y, x_to, y_to, type_of_movements)
-    # TODO: Return possible paths
-
     return unless @vertices_queue.length.positive?
 
     # insert first root into next_positions to be compatible with next rounds
@@ -189,7 +187,7 @@ class Tree
 
     build_tree_loop(next_positions, x_to, y_to, type_of_movements)
 
-    return path !!!
+    puts "\nPaths have been calculated on Vertices. Read the last vortex back to get possible paths."
   end
 end
 
@@ -429,15 +427,18 @@ class Board
     get_possible_movements(chip, @horse_movements)
   end
 
+  def generate_back_paths(vortex)
+
+  end
+
   def get_possible_path(current_x, current_y, x_to, y_to, type_of_movements)
     # set type_of_movements with for example: @horse_movements
-    puts "============================ GET POSSIBLE PATH ================================="
 
-    # create Tree and build it up
-    tree = Tree.new(return_all_vertices, current_x, current_y, x_to, y_to, type_of_movements)
+    # create Tree to calculate paths
+    Tree.new(return_all_vertices, current_x, current_y, x_to, y_to, type_of_movements)
 
-    puts "\n\nreturning result >>>"
-    p tree
+    # get paths
+    generate_back_paths(find_vortex(x_to, y_to))
   end
 
   def get_horse_paths(x_from, y_from, x_to, y_to)
@@ -464,6 +465,10 @@ class Board
     else
       puts "chip's moves not set yet"
     end
+  end
+
+  def find_vortex(x_to, y_to)
+    p @vertices[x_to][y_to]
   end
 end
 
