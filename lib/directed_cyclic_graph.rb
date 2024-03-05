@@ -104,7 +104,7 @@ class Tree
   end
 
   def build_tree_loop(next_positions, x_to, y_to, type_of_movements)
-    round = 1
+    round = 0
     found = false
 
     until found
@@ -137,7 +137,7 @@ class Tree
         p vertex
         delete_vertex(vertex.x__, vertex.y__)
         if (vertex.x__ == x_to) && (vertex.y__ == y_to)
-          puts "\t\t\t\t\t\t >>>>>>>>>>> destiny was found at [#{vertex.x__}, #{vertex.y__}] <<<<<<<<<<<<<"
+          puts "\t\t\t\t\t\t\t\t\t\t\t\t\t >>>>>>>>>>> destiny was found at [#{vertex.x__}, #{vertex.y__}] <<<<<<<<<<<<<"
           found = true
         end
       end
@@ -150,21 +150,9 @@ class Tree
 
     return unless @vertices_queue.length.positive?
 
-    # round 0
-    puts "\n\n\t ================================================================ round 0"
-    # get root and delete it from @vertices_queue
-    root = find_vertex(current_x, current_y)
-    delete_vertex(root.x__, root.y__)
-
-    # get next positions
-    next_positions = next_positions(root.x__, root.y__, type_of_movements)
-    # link positions to root
-    linked_positions = link_next_positions(next_positions, root)
-    # delete linked positions from @vertices_queue
-    linked_positions.each do |pos|
-      puts "removing >> [#{pos.x__}, #{pos.y__}] vertex from queue"
-      delete_vertex(pos.x__, pos.y__)
-    end
+    # insert first root into next_positions to be compatible with next rounds
+    next_positions = []
+    next_positions << find_vertex(current_x, current_y)
 
     build_tree_loop(next_positions, x_to, y_to, type_of_movements)
 
