@@ -48,14 +48,12 @@ class Tree
     chip_movements.each do |movement|
       next unless (current_x + movement[0]).between?(0,7) && (current_y + movement[1]).between?(0,7)
 
-      temp_array = [],[]
-      temp_array[0] = (current_x + movement[0])
-      temp_array[1] = (current_y + movement[1])
-      possible_movements << temp_array
+      # return vertex only if it's in the Queue
+      possible_movements << find_vertex((current_x + movement[0]), (current_y + movement[1]))
     end
-    # possible_movements.each { |movement| p movement }
 
-    # print_only_temp_positions(possible_movements)
+    # compact (remove nils)
+    possible_movements.compact!
 
     possible_movements
   end
@@ -66,8 +64,8 @@ class Tree
 
     current_positions.each do |position|
       unless position.nil?
-        puts "test >> current_position #{position[0]}, #{position[1]}"
-        linked_positions << find_vertex(position[0], position[1])
+        # puts "test >> current_position #{position.x__}, #{position.y__}"
+        linked_positions << find_vertex(position.x__, position.y__)
       end
     end
 
@@ -76,26 +74,25 @@ class Tree
     linked_positions.each do |pos|
       current_root.links << pos
     end
-    current_root.links.each { |link| puts "\t\t<< linked: #{link.x__}, #{link.y__}" }
+    current_root.links.each {|link| puts "\t\t<< linked: #{link.x__}, #{link.y__}" }
     puts "\n"
 
-    puts "read linked_positions before returning them"
-    linked_positions.each { |pos| p pos }
-    puts ""
+    # puts "read linked_positions before returning them"
+    # linked_positions.each {|pos| p pos }
+    # puts ""
 
     linked_positions
   end
 
   def find_vertex(current_x, current_y)
-    # try the other way around to check
-
+    # puts "\nfind_vertex #{current_x}, #{current_y}"
     @vertices_queue.each do |vertex|
       if (vertex.x__ == current_x) && (vertex.y__ == current_y)
-        puts "\nVERTEX DEBUG YES"
+        # puts "VERTEX FOUND #{vertex} > #{vertex.x__}, #{vertex.y__}"
         return vertex
       end
     end
-    puts "NO VERTEX"
+    nil
   end
 
   def delete_vertex(current_x, current_y)
@@ -109,6 +106,8 @@ class Tree
   def build_tree(current_x, current_y, x_to, y_to, type_of_movements)
     return unless @vertices_queue.length.positive?
 
+    # round 0
+    puts "\n\n\t ================================================================ round 0"
     # get root and delete it from @vertices_queue
     root = find_vertex(current_x, current_y)
     delete_vertex(root.x__, root.y__)
@@ -122,32 +121,34 @@ class Tree
       puts "removing >> [#{pos.x__}, #{pos.y__}] vertex from queue"
       delete_vertex(pos.x__, pos.y__)
     end
+
+    # round 1 <<< switch to loop until root == destiny or !root
+    puts "\n\n\t ================================================================ round 1"
     # iterate next_positions
-    next_root = next_positions
+    next_roots = next_positions
 
     trash_bin = []
     linked_positions = []
 
-    next_root.each do |next_root_|
-      # get next positions
-      next_positions = next_positions(next_root_[0], next_root_[1], type_of_movements)
-      # link positions to root
-      puts "\nread next_positions before sending to link_next_positions"
-      next_positions.each { |pos| p pos }
-      puts "\nprinting them as vertices"
-      next_positions.each { |pos| p find_vertex(pos[0], pos[1]) }
-      puts ""
-      linked_positions_temp = link_next_positions(next_positions, next_root_)
-      linked_positions_temp.each { |pos| linked_positions << pos }
+    next_roots.each do |next_root|
+      # print current root to be iterated
+      puts "\n\n\t >>>>>>>>>>>>> next root is >> [#{next_root.x__}, #{next_root.y__}] <<<<<<<<<<<<<<<<<<<"
 
-      puts "\nDEBUG OUTSIDE ==========="
-      next_positions.each { |e| p e }
-      puts "\n================="
+      # get next positions
+      next_positions = next_positions(next_root.x__, next_root.y__, type_of_movements)
+      # link positions to root
+      # puts "\nread next_positions before sending to link_next_positions"
+      # next_positions.each {|pos| p pos }
+
+      linked_positions_temp = link_next_positions(next_positions, next_root)
+      linked_positions_temp.each {|pos| linked_positions << pos }
+
       # gather all the used positions to remove later
-      next_positions.each { |position| trash_bin << position }
+      next_positions.each {|position| trash_bin << position }
     end
 
-    puts "\ntrash bin ======="
+    puts "\nemptying trash bin ======="
+    trash_bin.uniq!
     trash_bin.each do |vertex|
       p vertex
       delete_vertex(vertex.x__, vertex.y__)
@@ -270,7 +271,7 @@ class Board
   end
 
   def search_chip(chip)
-    @vertices.each { |row| row.each { |cell| return cell if cell.status == chip } }
+    @vertices.each {|row| row.each {|cell| return cell if cell.status == chip } }
     nil
   end
 
@@ -356,7 +357,7 @@ class Board
   end
 
   def set_possible_movements_temp(possible_movements, chip)
-    possible_movements.each { |movement| set_first_position(movement[0], movement[1], chip, true) }
+    possible_movements.each {|movement| set_first_position(movement[0], movement[1], chip, true) }
   end
 
   def get_possible_movements(chip, chip_movements)
@@ -374,7 +375,7 @@ class Board
       possible_movements << temp_array
     end
 
-    possible_movements.each { |movement| p movement }
+    possible_movements.each {|movement| p movement }
 
     print_temp_positions(possible_movements)
 
@@ -443,7 +444,7 @@ chess_board.print
 # chess_board.check_moves(:WHL)
 chess_board.check_moves(:WHL)
 
-chess_board.get_horse_paths(4, 0, 7, 7)
+chess_board.get_horse_paths(4, 0, 5, 1)
 
 # chess_board.set_chess_new_match_positions
 
