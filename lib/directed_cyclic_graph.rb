@@ -10,7 +10,7 @@ end
 
 class Vertex
   attr_reader :x__, :y__
-  attr_accessor :status, :background, :temp_status, :links
+  attr_accessor :status, :background, :temp_status, :links, :link_back
 
   def initialize(x__, y__)
     return unless x__ >= 0 && y__ >= 0
@@ -22,6 +22,7 @@ class Vertex
     @temp_status = " "
 
     @links = []
+    @link_back = []
   end
 end
 
@@ -31,11 +32,6 @@ class Tree
   def initialize(vertices, current_x, current_y, x_to, y_to, type_of_movements)
     puts "====================== initialize tree ================================"
     @vertices_queue = vertices
-
-    # print all vertices x y
-    # @vertices_queue.each do |vertex|
-    #   puts "#{vertex.x__}, #{vertex.y__}"
-    # end
 
     @root = build_tree(current_x, current_y, x_to, y_to, type_of_movements)
   end
@@ -58,7 +54,7 @@ class Tree
     possible_movements
   end
 
-  def link_next_positions(current_positions, current_root)
+  def link_root_to_pos(current_positions, current_root)
     # get the new positions (current_positions in this scope) and link them to current_root
     linked_positions = []
 
@@ -69,7 +65,7 @@ class Tree
       end
     end
 
-    # link the next positions found to current root
+    # link from root -> to current positions
     puts "\nadding links to root >> #{current_root.x__}, #{current_root.y__}"
     linked_positions.each do |pos|
       current_root.links << pos
@@ -77,9 +73,25 @@ class Tree
     current_root.links.each {|link| puts "\t\t<< linked: #{link.x__}, #{link.y__}" }
     puts "\n"
 
-    # puts "read linked_positions before returning them"
-    # linked_positions.each {|pos| p pos }
-    # puts ""
+    linked_positions
+  end
+
+  def link_pos_to_root(current_positions, current_root)
+    # get the new positions (current_positions in this scope) and link them to current_root
+    linked_positions = []
+
+    current_positions.each do |position|
+      unless position.nil?
+        # puts "test >> current_position #{position.x__}, #{position.y__}"
+        linked_positions << find_vertex(position.x__, position.y__)
+      end
+    end
+
+    # link back to root <- from current positions
+    # puts "\nadding on #{current_root.x__}, #{current_root.y__} << link/s back to possible roots"
+    linked_positions.each do |pos|
+      pos.link_back << current_root
+    end
 
     linked_positions
   end
@@ -95,10 +107,19 @@ class Tree
     nil
   end
 
+  def print_links_back(linked_positions)
+    linked_positions.each do |pos|
+      puts "\n\tpos >> [#{pos.x__}, #{pos.y__}] is linked back to"
+      pos.link_back.each { |link| puts "\t\t\t\t\t\t\t\t\t>> #{link.x__}, #{link.y__}" }
+    end
+    puts ""
+  end
+
   def delete_vertex(current_x, current_y)
     @vertices_queue.each_with_index do |vertex, i|
       next unless (vertex.x__ == current_x) && (vertex.y__ == current_y)
 
+      puts "\tremoving from queue >> [#{vertex.x__}, #{vertex.y__}]"
       @vertices_queue.delete_at(i)
     end
   end
@@ -124,20 +145,32 @@ class Tree
         # get next positions
         next_positions = next_positions(next_root.x__, next_root.y__, type_of_movements)
 
-        linked_positions_temp = link_next_positions(next_positions, next_root)
+        # deleting from Queue the current root to avoid adding wrong links back to it
+        delete_vertex(next_root.x__, next_root.y__)
+        linked_positions.uniq!
+
+        # puts "\nreading linked positions before sending them"
+        # linked_positions.each { |pos| p pos if find_vertex(pos.x__, pos.y__) }
+
+        # link back to create path
+        linked_positions_temp = link_pos_to_root(next_positions, next_root)
         linked_positions_temp.each { |pos| linked_positions << pos }
 
         # gather all the used positions to remove later
         next_positions.each { |position| trash_bin << position }
-      end
 
-      puts "\nemptying trash bin and check if destiny was found >>>> destiny is [#{x_to}, #{y_to}] ======="
+      end
       trash_bin.uniq!
+
+      # debug links back
+      print_links_back(trash_bin)
+
+      puts "\nEmpty trash bin and Check if destiny was found >>>> destiny is [#{x_to}, #{y_to}] ======="
       trash_bin.each do |vertex|
-        p vertex
+        # p vertex
         delete_vertex(vertex.x__, vertex.y__)
         if (vertex.x__ == x_to) && (vertex.y__ == y_to)
-          puts "\t\t\t\t\t\t\t\t\t\t\t\t\t >>>>>>>>>>> destiny was found at [#{vertex.x__}, #{vertex.y__}] <<<<<<<<<<<<<"
+          puts "\t\t\t\t\t\t\t\t >>>>>>>>>>> destiny was found at [#{vertex.x__}, #{vertex.y__}] <<<<<<<<<<<<<"
           found = true
         end
       end
@@ -156,7 +189,7 @@ class Tree
 
     build_tree_loop(next_positions, x_to, y_to, type_of_movements)
 
-    root
+    return path !!!
   end
 end
 
