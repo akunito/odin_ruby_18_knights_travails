@@ -132,7 +132,7 @@ class Tree
     until found
       puts "\n\n\t ================================================================ round #{round}"
 
-      # in first round get next_roots from parameter next_positions, 
+      # in first round get next_roots from parameter next_positions,
       # next rounds get it from trash_bin that gathered all next_positions from previous round
       next_roots = round.zero? ? next_positions : trash_bin
       round += 1
@@ -432,11 +432,13 @@ class Board
     get_possible_movements(chip, @horse_movements)
   end
 
-  def read_path(vortex, array = [])
+  def read_path(vortex, array=[])
     array << [vortex.x__, vortex.y__]
 
     if vortex.link_back
-      vortex.link_back.each { |link| read_path(link, array) }
+      # more options are possible but for simplicity we return first link_back only
+      # vortex.link_back.each { |link| read_path(link, array) }
+      vortex.link_back.each_with_index { |link, i| read_path(link, array) if i == 0 }
     end
 
     array
@@ -447,13 +449,9 @@ class Board
 
     paths = []
 
-    # puts "\n ===== testing ===="
-    # vortex.link_back.each { |link| p link }
-
     vortex.link_back.each do |link|
       array = []
       array << [vortex.x__, vortex.y__]
-      # array << [link.x__, link.y__]
       read_path(link).each { |ele| array << ele }
       paths << array.reverse
     end
@@ -517,7 +515,7 @@ chess_board.print
 # chess_board.check_moves(:WHL)
 chess_board.check_moves(:WHL)
 
-chess_board.get_horse_paths(4, 0, 4, 3)
+chess_board.get_horse_paths(4, 0, 6, 3)
 
 # chess_board.set_chess_new_match_positions
 
