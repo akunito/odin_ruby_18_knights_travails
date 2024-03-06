@@ -432,11 +432,14 @@ class Board
     get_possible_movements(chip, @horse_movements)
   end
 
-  def read_path(vortex)
+  def read_path(vortex, array = [])
+    array << [vortex.x__, vortex.y__]
+
     if vortex.link_back
-      vortex.link_back.each { |link| read_path(link) }
+      vortex.link_back.each { |link| read_path(link, array) }
     end
-    [vortex.x__, vortex.y__]
+
+    array
   end
 
   def generate_back_paths(vortex)
@@ -450,9 +453,9 @@ class Board
     vortex.link_back.each do |link|
       array = []
       array << [vortex.x__, vortex.y__]
-      array << [link.x__, link.y__]
-      array << read_path(link)
-      paths << array
+      # array << [link.x__, link.y__]
+      read_path(link).each { |ele| array << ele }
+      paths << array.reverse
     end
 
     paths
