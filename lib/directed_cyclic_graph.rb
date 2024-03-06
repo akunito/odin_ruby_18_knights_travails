@@ -427,8 +427,30 @@ class Board
     get_possible_movements(chip, @horse_movements)
   end
 
-  def generate_back_paths(vortex)
+  def read_path(vortex)
+    if vortex.link_back
+      vortex.link_back.each { |link| read_path(link) }
+    end
+    [vortex.x__, vortex.y__]
+  end
 
+  def generate_back_paths(vortex)
+    nil unless vortex
+
+    paths = []
+
+    # puts "\n ===== testing ===="
+    # vortex.link_back.each { |link| p link }
+
+    vortex.link_back.each do |link|
+      array = []
+      array << [vortex.x__, vortex.y__]
+      array << [link.x__, link.y__]
+      array << read_path(link)
+      paths << array
+    end
+
+    paths
   end
 
   def get_possible_path(current_x, current_y, x_to, y_to, type_of_movements)
@@ -438,7 +460,10 @@ class Board
     Tree.new(return_all_vertices, current_x, current_y, x_to, y_to, type_of_movements)
 
     # get paths
-    generate_back_paths(find_vortex(x_to, y_to))
+    paths = generate_back_paths(find_vortex(x_to, y_to))
+
+    puts "\n\n============ results =============== .each"
+    paths.each { |path| p path }
   end
 
   def get_horse_paths(x_from, y_from, x_to, y_to)
@@ -484,7 +509,7 @@ chess_board.print
 # chess_board.check_moves(:WHL)
 chess_board.check_moves(:WHL)
 
-chess_board.get_horse_paths(4, 0, 5, 1)
+chess_board.get_horse_paths(4, 0, 4, 3)
 
 # chess_board.set_chess_new_match_positions
 
