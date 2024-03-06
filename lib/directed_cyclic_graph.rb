@@ -127,13 +127,18 @@ class Tree
   def build_tree_loop(next_positions, x_to, y_to, type_of_movements)
     round = 0
     found = false
+    trash_bin = []
 
     until found
       puts "\n\n\t ================================================================ round #{round}"
+
+      # in first round get next_roots from parameter next_positions, 
+      # next rounds get it from trash_bin that gathered all next_positions from previous round
+      next_roots = round.zero? ? next_positions : trash_bin
       round += 1
 
-      # iterate next_positions
-      next_roots = next_positions
+      puts "\nreading next roots to iterate"
+      next_roots.each { |root| p root }
 
       trash_bin = []
       linked_positions = []
